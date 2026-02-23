@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Artificial Wikipedia Generator</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            transition: 0.3s;
+        }
+
+        .dark-mode {
+            background-color: #1e1e1e;
+            color: white;
+        }
+
+        header {
+            background-color: white;
+            border-bottom: 1px solid #a2a9b1;
+            padding: 15px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .dark-mode header {
+            background-color: #2b2b2b;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #a2a9b1;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px 0;
+            background-color: #3366cc;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #254a91;
+        }
+
+        .wiki-box {
+            margin-top: 30px;
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #a2a9b1;
+        }
+
+        .dark-mode .wiki-box {
+            background-color: #2b2b2b;
+        }
+
+        .wiki-title {
+            font-size: 26px;
+            border-bottom: 1px solid #a2a9b1;
+            margin-bottom: 10px;
+        }
+
+        .info-box {
+            float: right;
+            width: 250px;
+            border: 1px solid #a2a9b1;
+            padding: 10px;
+            background-color: #f8f9fa;
+            margin-left: 20px;
+            text-align: center;
+        }
+
+        .dark-mode .info-box {
+            background-color: #3b3b3b;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+
+        .clear {
+            clear: both;
+        }
+
+        .profile-list {
+            margin-top: 20px;
+        }
+
+        .profile-item {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>Artificial Wikipedia Generator</header>
+
+<div class="container">
+
+<h2>Create Your Profile</h2>
+
+<input type="text" id="name" placeholder="Enter your name">
+<input type="text" id="dob" placeholder="Date of Birth">
+<input type="text" id="profession" placeholder="Profession">
+<input type="file" id="photo">
+<input type="text" id="instagram" placeholder="Instagram link">
+<input type="text" id="twitter" placeholder="Twitter link">
+<textarea id="bio" rows="5" placeholder="Write your biodata..."></textarea>
+
+<button onclick="generateWiki()">Generate Page</button>
+<button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+<button onclick="downloadPDF()">Download as PDF</button>
+
+<div id="output"></div>
+
+<div class="profile-list">
+    <h3>Saved Profiles</h3>
+    <div id="savedProfiles"></div>
+</div>
+
+</div>
+
+<script>
+let currentProfile = "";
+
+function generateWiki() {
+    let name = document.getElementById("name").value;
+    let dob = document.getElementById("dob").value;
+    let profession = document.getElementById("profession").value;
+    let bio = document.getElementById("bio").value;
+    let instagram = document.getElementById("instagram").value;
+    let twitter = document.getElementById("twitter").value;
+    let photo = document.getElementById("photo").files[0];
+
+    let reader = new FileReader();
+    reader.onload = function(e) {
+
+        currentProfile = `
+        <div class="wiki-box" id="wikiContent">
+            <div class="wiki-title">${name}</div>
+
+            <div class="info-box">
+                <img src="${e.target.result}">
+                <p><strong>Born:</strong> ${dob}</p>
+                <p><strong>Profession:</strong> ${profession}</p>
+                <p><a href="${instagram}" target="_blank">Instagram</a></p>
+                <p><a href="${twitter}" target="_blank">Twitter</a></p>
+            </div>
+
+            <p><strong>${name}</strong> is a ${profession}. ${bio}</p>
+            <div class="clear"></div>
+        </div>
+        `;
+
+        document.getElementById("output").innerHTML = currentProfile;
+
+        saveProfile(name, currentProfile);
+    }
+
+    if(photo) {
+        reader.readAsDataURL(photo);
+    }
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+}
+
+function downloadPDF() {
+    let printContent = document.getElementById("wikiContent").innerHTML;
+    let newWindow = window.open("");
+    newWindow.document.write(printContent);
+    newWindow.print();
+}
+
+function saveProfile(name, content) {
+    localStorage.setItem(name, content);
+    loadProfiles();
+}
+
+function loadProfiles() {
+    let saved = document.getElementById("savedProfiles");
+    saved.innerHTML = "";
+
+    for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+        saved.innerHTML += `<div class="profile-item" onclick="loadProfile('${key}')">${key}</div>`;
+    }
+}
+
+function loadProfile(name) {
+    document.getElementById("output").innerHTML = localStorage.getItem(name);
+}
+
+loadProfiles();
+</script>
+
+</body>
+</html>
